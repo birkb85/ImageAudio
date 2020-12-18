@@ -3,12 +3,12 @@ html, body {
     padding: 0;
 }
 
-canvas {
+/* canvas {
     display: block;
     position: absolute;
     left: 0px;
     top: 0px;
-}
+} */
 
 img, image, canvas {
     -moz-user-select: none;

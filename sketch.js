@@ -5,15 +5,35 @@ let hornReal = new Float32Array([0, 0.4, 0.4, 1, 1, 1, 0.3, 0.7, 0.6, 0.5, 0.9, 
 let hornImag = new Float32Array(hornReal.length);
 let hornTable = audioContext.createPeriodicWave(hornReal, hornImag);
 
-let sinReal = new Float32Array([1, -1]);
+let sinReal = new Float32Array([0, 1]);
 let sinImag = new Float32Array(sinReal.length);
 let sinTable = audioContext.createPeriodicWave(sinReal, sinImag);
 
-let randomReal = new Float32Array(12);
-let randomImag;
+let randomLength = 12;
+let randomReal = new Float32Array(randomLength);
+let randomImag = new Float32Array(randomLength);
 let randomTable;
 
 let isPlaying = false;
+
+let canvas;
+let capture;
+
+function setup() {
+    canvas = createCanvas(320, 240, P2D);
+    canvas.parent('sketch-holder');
+
+    capture = createCapture(VIDEO);
+    capture.size(320, 240);
+    capture.hide();
+}
+
+function draw() {
+    background(200, 200, 200);
+
+    image(capture, 0, 0, 320, 240);
+    // filter(INVERT);
+}
 
 function toggle() {
     let button = document.getElementById("button");
@@ -30,10 +50,10 @@ function toggle() {
 }
 
 function randomize() {
-    for (let i = 1; i < randomReal.length; i++) {
+    for (let i = 1; i < randomLength; i++) {
         randomReal[i] = Math.random() * 2 - 1;
+        randomImag[i] = 0;
     }
-    randomImag = new Float32Array(randomReal.length);
     randomTable = audioContext.createPeriodicWave(randomReal, randomImag);
 }
 
