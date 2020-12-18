@@ -9,7 +9,7 @@ let sinReal = new Float32Array([1, -1]);
 let sinImag = new Float32Array(sinReal.length);
 let sinTable = audioContext.createPeriodicWave(sinReal, sinImag);
 
-let randomReal = new Float32Array(10);
+let randomReal = new Float32Array(12);
 let randomImag;
 let randomTable;
 
