@@ -10,7 +10,7 @@ function sharkFin(x) {
 }
 
 function sharkFinInit() {
-    let sharkFinArray = new Float32Array(196);
+    let sharkFinArray = new Float32Array(200);
     for (let i = 0; i < sharkFinArray.length; i++) {
         sharkFinArray[i] = sharkFin(i / 200);
     }
