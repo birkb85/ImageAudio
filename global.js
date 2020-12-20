@@ -1,3 +1,6 @@
+// For calculating real and imag values: https://github.com/corbanbrook/dsp.js/
+// Edge detection example for p5js: https://editor.p5js.org/aatish/sketches/SJoT7GDtf
+
 let audioContext = new AudioContext();
 let osc = audioContext.createOscillator();
 let lfo = audioContext.createOscillator();
