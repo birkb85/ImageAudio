@@ -10,7 +10,7 @@ class Edge {
     draw() {
         // background(200, 200, 200);
 
-        image(capture, 0, 0, capture.width, capture.height);
+        image(capture, 0, 0, w, h);
         // image(capture, 0, 0, width, width * (capture.height / capture.width));
 
         capture.loadPixels();

@@ -4,8 +4,17 @@ function setup() {
     canvas = createCanvas(w, h, P2D);
     canvas.parent('sketch-holder');
 
-    capture = createCapture(VIDEO);
-    capture.size(w, h);
+    let constraints = {
+        video: {
+            mandatory: {
+                maxWidth: 640, // TODO BB 320. Of tilpas til mobil enheder og skiftende opløsning.
+                maxHeight: 640
+            },
+            optional: [{ maxFrameRate: 10 }]
+        },
+        audio: false
+    };
+    capture = createCapture(constraints);
     capture.hide();
 
     noFill();
