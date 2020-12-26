@@ -12,4 +12,4 @@ let isPlaying = false;
 let canvas;
 let capture;
 
-// let slider;
+let w = 640, h = 480;
