@@ -1,7 +1,7 @@
 let edge = new Edge();
 
 function setup() {
-    canvas = createCanvas(w, h, P2D);
+    canvas = createCanvas(windowWidth, windowHeight, P2D);
     canvas.parent('sketch-holder');
 
     let constraints = {
@@ -21,19 +21,29 @@ function setup() {
     strokeWeight(4);
 }
 
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}
+
 function draw() {
     edge.draw();
 }
 
+function touchStarted(event) {
+    // console.log(event);
+
+    toggle();
+}
+
 function toggle() {
-    let button = document.getElementById("button");
+    // let button = document.getElementById("button");
     if (!isPlaying) {
-        button.innerText = "Stop";
+        // button.innerText = "Stop";
         edge.play();
         isPlaying = true;
     } else {
         isPlaying = false;
-        button.innerText = "Play";
+        // button.innerText = "Play";
         edge.stop();
     }
 }

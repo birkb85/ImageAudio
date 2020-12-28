@@ -11,5 +11,3 @@ let isPlaying = false;
 
 let canvas;
 let capture;
-
-let w = 640, h = 480;

@@ -1,34 +1,29 @@
 class Edge {
     constructor() {
-        this.buffer = new jsfeat.matrix_t(w, h, jsfeat.U8C1_t);
-        this.result;
-
         this.imageWaveformArray;
         this.imageWaveformTable;
     }
 
     draw() {
-        // background(200, 200, 200);
+        background(200);
 
-        image(capture, 0, 0, w, h);
+        image(capture, 0, 0, capture.width, capture.height);
         // image(capture, 0, 0, width, width * (capture.height / capture.width));
 
         capture.loadPixels();
-        if (capture.pixels.length > 0) { // don't forget this!        
-            let blurSize = 8;//30;
-            let lowThreshold = 38;//15;
-            let highThreshold = 64;//25;
+        if (capture.pixels.length > 0) {  
+            let blurSize = 8;
+            let lowThreshold = 38;
+            let highThreshold = 64;
 
-            // blurSize = map(blurSize, 0, 100, 1, 12);
-            // lowThreshold = map(lowThreshold, 0, 100, 0, 255);
-            // highThreshold = map(highThreshold, 0, 100, 0, 255);
-
-            jsfeat.imgproc.grayscale(capture.pixels, w, h, this.buffer);
-            jsfeat.imgproc.gaussian_blur(this.buffer, this.buffer, blurSize, 0);
-            jsfeat.imgproc.canny(this.buffer, this.buffer, lowThreshold, highThreshold);
-            // this.result = jsfeatToP5(this.buffer, this.result);
-            // image(this.result, 0, 0, w, h);
-            this.calcImageWaveform(this.buffer);
+            let buffer = new jsfeat.matrix_t(capture.width, capture.height, jsfeat.U8C1_t);
+            jsfeat.imgproc.grayscale(capture.pixels, capture.width, capture.height, buffer);
+            jsfeat.imgproc.gaussian_blur(buffer, buffer, blurSize, 0);
+            jsfeat.imgproc.canny(buffer, buffer, lowThreshold, highThreshold);
+            let result;
+            result = this.jsfeatToP5(buffer, result);
+            image(result, 0, 0, capture.width, capture.height);
+            this.calcImageWaveform(buffer);
             this.drawImageWaveform();
             this.setImageWaveformTable();
         }
@@ -39,10 +34,10 @@ class Edge {
         if (waveform.length > 0) {
             stroke('red');
             beginShape();
-            let waveformW = waveform.length / w;
+            let waveformW = waveform.length / width;
             for (let i = 0; i < waveform.length; i++) {
                 let x = i / waveformW;//8;
-                let y = (height / 2) + (waveform[i] * 200);
+                let y = (height / 2) + (waveform[i] * (height / 2));
                 vertex(x, y);
             }
             endShape();
@@ -50,19 +45,33 @@ class Edge {
     }
 
     calcImageWaveform(src) {
-        this.imageWaveformArray = new Int16Array(w);
-        let imageWaveformCalcArray = new Float32Array(w);
+        this.imageWaveformArray = new Int16Array(src.cols);
+        let imageWaveformCalcArray = new Float32Array(src.rows);
         let prevY = src.rows / 2;
     
         for (let x = 0; x < src.cols; x++) {
-            for (let y = 0; y < src.rows; y++) {
-                let color = src.data[x + (y * src.cols)];
-                if (color == 255) {
-                    this.imageWaveformArray[x] = y;
-                    imageWaveformCalcArray[x] = 1 - (y / src.rows);
-                    prevY = y;
+            for (let row = 0; row < src.rows / 2; row++) {
+                let yUp = (src.rows / 2) - 1 - row;
+                let yDown = (src.rows / 2) + row;
+
+                let colorUp = src.data[x + (yUp * src.cols)];
+                if (colorUp == 255) {
+                    this.imageWaveformArray[x] = yUp;
+                    imageWaveformCalcArray[x] = 1 - (yUp / src.rows);
+                    prevY = yUp;
                     break;
-                } else if (y == (src.rows - 1)) {
+                } else if (yUp == 0) {
+                    this.imageWaveformArray[x] = prevY;
+                    imageWaveformCalcArray[x] = 1 - (prevY / src.rows);
+                }
+
+                let colorDown = src.data[x + (yDown * src.cols)];
+                if (colorDown == 255) {
+                    this.imageWaveformArray[x] = yDown;
+                    imageWaveformCalcArray[x] = 1 - (yDown / src.rows);
+                    prevY = yDown;
+                    break;
+                } else if (yDown == (src.rows - 1)) {
                     this.imageWaveformArray[x] = prevY;
                     imageWaveformCalcArray[x] = 1 - (prevY / src.rows);
                 }
@@ -83,41 +92,42 @@ class Edge {
         endShape();
     }
     
-    // // convert grayscale jsfeat image to p5 rgba image
-    // // usage: dst = jsfeatToP5(src, dst)
-    // jsfeatToP5(src, dst) {
-    //     if (!dst || dst.width != src.cols || dst.height != src.rows) {
-    //         dst = createImage(src.cols, src.rows);
-    //     }
-    //     let n = src.data.length;
-    //     dst.loadPixels();
-    //     let srcData = src.data;
-    //     let dstData = dst.pixels;
-    //     for (let i = 0, j = 0; i < n; i++) {
-    //         let cur = srcData[i];
-    //         // Normal conversion:
-    //         // dstData[j++] = cur;
-    //         // dstData[j++] = cur;
-    //         // dstData[j++] = cur;
-    //         // dstData[j++] = 255;
+    // convert grayscale jsfeat image to p5 rgba image
+    // usage: dst = jsfeatToP5(src, dst)
+    jsfeatToP5(src, dst) {
+        if (!dst || dst.width != src.cols || dst.height != src.rows) {
+            dst = createImage(src.cols, src.rows);
+        }
+        let n = src.data.length;
+        dst.loadPixels();
+        let srcData = src.data;
+        let dstData = dst.pixels;
+        for (let i = 0, j = 0; i < n; i++) {
+            let cur = srcData[i];
+            // Normal conversion:
+            // dstData[j++] = cur;
+            // dstData[j++] = cur;
+            // dstData[j++] = cur;
+            // dstData[j++] = 255;
     
-    //         // Changed to my situation:
-    //         dstData[j++] = 0;
-    //         dstData[j++] = 0;
-    //         dstData[j++] = 0;
-    //         if (cur == 0) {
-    //             dstData[j++] = 0;
-    //         } else if (cur == 255) {
-    //             dstData[j++] = 255;
-    //         }
-    //     }
-    //     dst.updatePixels();
-    //     return dst;
-    // }
+            // Changed to my situation:
+            dstData[j++] = 0;
+            dstData[j++] = 0;
+            dstData[j++] = 0;
+            if (cur == 0) {
+                dstData[j++] = 0;
+            } else if (cur == 255) {
+                dstData[j++] = 255;
+            }
+        }
+        dst.updatePixels();
+        return dst;
+    }
 
     setImageWaveformTable() {
         if (isPlaying) {
-            lfo.setPeriodicWave(this.imageWaveformTable);
+            if (this.imageWaveformTable)
+                lfo.setPeriodicWave(this.imageWaveformTable);
         }
     }
     
@@ -126,7 +136,8 @@ class Edge {
         osc.frequency.value = 600;//1200;//160;
     
         lfo = audioContext.createOscillator();
-        lfo.setPeriodicWave(this.imageWaveformTable);
+        if (this.imageWaveformTable)
+            lfo.setPeriodicWave(this.imageWaveformTable);
         lfo.frequency.value = 0.2;//1 / 0.380;
     
         let lfoGain = audioContext.createGain();
