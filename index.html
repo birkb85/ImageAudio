@@ -37,7 +37,37 @@
         crossorigin="anonymous"></script>
 
     <div id="sketch-holder"></div>
-    <button id="playButton" type="button" class="btn btn-primary" onclick="togglePlay();">Play</button>
+    <div id="container" class="container-fluid">
+        <div class="row">
+            <div class="col-5">
+                <input type="range" class="form-range" id="blurSizeRange" value="30">
+            </div>
+            <div class="col">
+                <p><b>Blur Size</b></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-5">
+                <input type="range" class="form-range" id="lowThresholdRange" value="15">
+            </div>
+            <div class="col">
+                <p><b>Low Threshold</b></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-5">
+                <input type="range" class="form-range" id="highThresholdRange" value="25">
+            </div>
+            <div class="col">
+                <p><b>High Threshold</b></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-5">
+                <button id="playButton" type="button" class="btn btn-primary" onclick="togglePlay();">Play</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

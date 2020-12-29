@@ -21,12 +21,32 @@ img, image, canvas {
     -khtml-user-select: none;
 }
 
-button {
+#container {
     display: block;
     position: absolute;
 }
 
-#playButton {
+/* button, input {
+    display: block;
+    position: absolute;
+}
+
+#blurSizeRange {
     left: 10px;
     top: 10px;
 }
+
+#lowThresholdRange {
+    left: 10px;
+    top: 30px;
+}
+
+#highThresholdRange {
+    left: 10px;
+    top: 50px;
+}
+
+#playButton {
+    left: 10px;
+    top: 70px;
+} */

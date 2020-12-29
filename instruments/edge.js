@@ -34,13 +34,17 @@ class Edge {
 
         capture.loadPixels();
         if (capture.pixels.length > 0) {
-            let blurSize = 8;
-            let lowThreshold = 60;//38;
-            let highThreshold = 0;//64;
+            // let blurSize = 8;
+            // let lowThreshold = 60;//38;
+            // let highThreshold = 0;//64;
 
-            // blurSize = map(blurSize, 0, 100, 1, 12);
-            // lowThreshold = map(lowThreshold, 0, 100, 0, 255);
-            // highThreshold = map(highThreshold, 0, 100, 0, 255);
+            let blurSize = select('#blurSizeRange').elt.value;
+            let lowThreshold = select('#lowThresholdRange').elt.value;
+            let highThreshold = select('#highThresholdRange').elt.value;
+
+            blurSize = map(blurSize, 0, 100, 1, 12);
+            lowThreshold = map(lowThreshold, 0, 100, 0, 255);
+            highThreshold = map(highThreshold, 0, 100, 0, 255);
 
             let buffer = new jsfeat.matrix_t(capture.width, capture.height, jsfeat.U8C1_t);
             jsfeat.imgproc.grayscale(capture.pixels, capture.width, capture.height, buffer);
