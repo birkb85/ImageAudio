@@ -39,21 +39,15 @@ function draw() {
     edge.draw();
 }
 
-function touchStarted(event) {
-    // console.log(event);
-
-    toggle();
-}
-
-function toggle() {
-    // let button = document.getElementById("button");
+function togglePlay() {
+    let button = document.getElementById("playButton");
     if (!isPlaying) {
-        // button.innerText = "Stop";
+        button.innerText = "Stop";
         edge.play();
         isPlaying = true;
     } else {
         isPlaying = false;
-        // button.innerText = "Play";
+        button.innerText = "Play";
         edge.stop();
     }
 }

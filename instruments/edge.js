@@ -113,6 +113,10 @@ class Edge {
     
     drawImageWaveform(captureX, captureY, captureWidth) {
         let ratio = captureWidth / this.imageWaveformArray.length;
+
+        stroke('green');
+        line(captureX, height / 2, ((this.imageWaveformArray.length - 1) * ratio) + captureX, height / 2);
+
         stroke('black');
         beginShape();
         for (let x = 0; x < this.imageWaveformArray.length; x++) {
