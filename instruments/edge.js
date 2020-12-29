@@ -1,5 +1,14 @@
+// For calculating real and imag values: https://github.com/corbanbrook/dsp.js/
+// Edge detection example for p5js: https://editor.p5js.org/aatish/sketches/SJoT7GDtf
+
 class Edge {
     constructor() {
+        this.audioContext = new AudioContext();
+        this.osc = this.audioContext.createOscillator();
+        this.lfo = this.audioContext.createOscillator();
+        this.analyser = this.audioContext.createAnalyser();
+        this.waveform = new Float32Array();
+
         this.imageWaveformArray;
         this.imageWaveformTable;
     }
@@ -7,37 +16,56 @@ class Edge {
     draw() {
         background(200);
 
-        image(capture, 0, 0, capture.width, capture.height);
-        // image(capture, 0, 0, width, width * (capture.height / capture.width));
+        let captureRatio = capture.width / capture.height;
+        let canvasRatio = width / height;
+        let captureX = 0;
+        let captureY = 0;
+        let captureWidth = width;
+        let captureHeight = height;
+        if (captureRatio < canvasRatio) {
+            captureWidth = height * captureRatio;
+            captureX = (width - captureWidth) / 2;
+        } else {
+            captureHeight = width / captureRatio;
+            captureY = (height - captureHeight) / 2;
+        }
+
+        image(capture, captureX, captureY, captureWidth, captureHeight);
 
         capture.loadPixels();
-        if (capture.pixels.length > 0) {  
+        if (capture.pixels.length > 0) {
             let blurSize = 8;
-            let lowThreshold = 38;
-            let highThreshold = 64;
+            let lowThreshold = 60;//38;
+            let highThreshold = 0;//64;
+
+            // blurSize = map(blurSize, 0, 100, 1, 12);
+            // lowThreshold = map(lowThreshold, 0, 100, 0, 255);
+            // highThreshold = map(highThreshold, 0, 100, 0, 255);
 
             let buffer = new jsfeat.matrix_t(capture.width, capture.height, jsfeat.U8C1_t);
             jsfeat.imgproc.grayscale(capture.pixels, capture.width, capture.height, buffer);
             jsfeat.imgproc.gaussian_blur(buffer, buffer, blurSize, 0);
             jsfeat.imgproc.canny(buffer, buffer, lowThreshold, highThreshold);
+
             let result;
             result = this.jsfeatToP5(buffer, result);
-            image(result, 0, 0, capture.width, capture.height);
+            image(result, captureX, captureY, captureWidth, captureHeight);
+
             this.calcImageWaveform(buffer);
-            this.drawImageWaveform();
+            this.drawImageWaveform(captureX, captureY, captureWidth);
             this.setImageWaveformTable();
         }
 
         if (isPlaying) {
-            analyser.getFloatTimeDomainData(waveform);
+            this.analyser.getFloatTimeDomainData(this.waveform);
         }
-        if (waveform.length > 0) {
+        if (this.waveform.length > 0) {
             stroke('red');
             beginShape();
-            let waveformW = waveform.length / width;
-            for (let i = 0; i < waveform.length; i++) {
+            let waveformW = this.waveform.length / width;
+            for (let i = 0; i < this.waveform.length; i++) {
                 let x = i / waveformW;//8;
-                let y = (height / 2) + (waveform[i] * (height / 2));
+                let y = (height / 2) + (this.waveform[i] * (height / 2));
                 vertex(x, y);
             }
             endShape();
@@ -80,14 +108,15 @@ class Edge {
     
         let ft = new DFT(imageWaveformCalcArray.length);
         ft.forward(imageWaveformCalcArray);
-        this.imageWaveformTable = audioContext.createPeriodicWave(ft.real, ft.imag);
+        this.imageWaveformTable = this.audioContext.createPeriodicWave(ft.real, ft.imag);
     }
     
-    drawImageWaveform() {
+    drawImageWaveform(captureX, captureY, captureWidth) {
+        let ratio = captureWidth / this.imageWaveformArray.length;
         stroke('black');
         beginShape();
         for (let x = 0; x < this.imageWaveformArray.length; x++) {
-            vertex(x, this.imageWaveformArray[x]);
+            vertex((x * ratio) + captureX, (this.imageWaveformArray[x] * ratio) + captureY);
         }
         endShape();
     }
@@ -126,37 +155,53 @@ class Edge {
 
     setImageWaveformTable() {
         if (isPlaying) {
-            if (this.imageWaveformTable)
-                lfo.setPeriodicWave(this.imageWaveformTable);
+            if (this.imageWaveformTable) {
+                // this.osc.setPeriodicWave(this.imageWaveformTable);
+                this.lfo.setPeriodicWave(this.imageWaveformTable);
+            }
         }
     }
     
+    // play() {
+    //     this.osc = this.audioContext.createOscillator();
+    //     this.osc.setPeriodicWave(this.imageWaveformTable);
+    //     this.osc.frequency.value = 160;
+
+    //     this.osc.connect(this.audioContext.destination);
+
+    //     this.analyser.fftSize = 2048;
+    //     this.osc.connect(this.analyser);
+    //     this.waveform = new Float32Array(this.analyser.frequencyBinCount);
+
+    //     this.osc.start(0);
+    // }
+
     play() {
-        osc = audioContext.createOscillator();
-        osc.frequency.value = 600;//1200;//160;
+        this.osc = this.audioContext.createOscillator();
+        this.osc.frequency.value = 600;//1200;//160;
     
-        lfo = audioContext.createOscillator();
+        this.lfo = this.audioContext.createOscillator();
         if (this.imageWaveformTable)
-            lfo.setPeriodicWave(this.imageWaveformTable);
-        lfo.frequency.value = 0.2;//1 / 0.380;
+        this.lfo.setPeriodicWave(this.imageWaveformTable);
+        this.lfo.frequency.value = 0.2;//1 / 0.380;
     
-        let lfoGain = audioContext.createGain();
+        let lfoGain = this.audioContext.createGain();
         lfoGain.gain.value = 2000;//450;
     
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc.frequency);
-        osc.connect(audioContext.destination);
+        this.lfo.connect(lfoGain);
+        lfoGain.connect(this.osc.frequency);
+        this.osc.connect(this.audioContext.destination);
     
-        analyser.fftSize = 16384;//2048;
-        lfo.connect(analyser);
-        waveform = new Float32Array(analyser.frequencyBinCount);
+        this.analyser.fftSize = 16384;//2048;
+        this.lfo.connect(this.analyser);
+        this.waveform = new Float32Array(this.analyser.frequencyBinCount);
     
-        osc.start(0);
-        lfo.start(0);
+        this.osc.start(0);
+        this.lfo.start(0);
     }
     
     stop() {
-        osc.disconnect();
-        lfo.disconnect();
+        this.osc.disconnect();
+        this.lfo.disconnect();
     }
 }

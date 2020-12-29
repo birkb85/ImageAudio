@@ -4,18 +4,7 @@ function setup() {
     canvas = createCanvas(windowWidth, windowHeight, P2D);
     canvas.parent('sketch-holder');
 
-    let constraints = {
-        video: {
-            mandatory: {
-                maxWidth: 640, // TODO BB 320. Of tilpas til mobil enheder og skiftende opløsning.
-                maxHeight: 640
-            },
-            optional: [{ maxFrameRate: 10 }]
-        },
-        audio: false
-    };
-    capture = createCapture(constraints);
-    capture.hide();
+    initCapture();
 
     noFill();
     strokeWeight(4);
@@ -23,6 +12,25 @@ function setup() {
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
+
+    initCapture();
+}
+
+function initCapture() {
+    // TODO BB https://github.com/processing/p5.js/issues/1496
+    let constraints = {
+        video: {
+            facingMode: "environment"
+            // mandatory: {
+            //     maxWidth: 640, // TODO BB 320. Of tilpas til mobil enheder og skiftende opløsning.
+            //     maxHeight: 640
+            // },
+            // optional: [{ maxFrameRate: 10 }]
+        },
+        audio: false
+    };
+    capture = createCapture(constraints);
+    capture.hide();
 }
 
 function draw() {
