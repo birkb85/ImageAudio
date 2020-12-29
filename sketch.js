@@ -20,7 +20,9 @@ function initCapture() {
     // TODO BB https://github.com/processing/p5.js/issues/1496
     let constraints = {
         video: {
-            facingMode: "environment"
+            facingMode: "environment"//,
+            // width: 320,
+            // height: 640
             // mandatory: {
             //     maxWidth: 640, // TODO BB 320. Of tilpas til mobil enheder og skiftende opløsning.
             //     maxHeight: 640

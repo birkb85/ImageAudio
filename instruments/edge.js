@@ -74,7 +74,7 @@ class Edge {
 
     calcImageWaveform(src) {
         this.imageWaveformArray = new Int16Array(src.cols);
-        let imageWaveformCalcArray = new Float32Array(src.rows);
+        let imageWaveformCalcArray = new Float32Array(src.cols);
         let prevY = src.rows / 2;
     
         for (let x = 0; x < src.cols; x++) {
@@ -179,23 +179,24 @@ class Edge {
     play() {
         this.osc = this.audioContext.createOscillator();
         this.osc.frequency.value = 600;//1200;//160;
-    
+
         this.lfo = this.audioContext.createOscillator();
-        if (this.imageWaveformTable)
-        this.lfo.setPeriodicWave(this.imageWaveformTable);
+        if (this.imageWaveformTable) {
+            this.lfo.setPeriodicWave(this.imageWaveformTable);
+        }
         this.lfo.frequency.value = 0.2;//1 / 0.380;
-    
+
         let lfoGain = this.audioContext.createGain();
         lfoGain.gain.value = 2000;//450;
-    
+
         this.lfo.connect(lfoGain);
         lfoGain.connect(this.osc.frequency);
         this.osc.connect(this.audioContext.destination);
-    
+
         this.analyser.fftSize = 16384;//2048;
         this.lfo.connect(this.analyser);
         this.waveform = new Float32Array(this.analyser.frequencyBinCount);
-    
+
         this.osc.start(0);
         this.lfo.start(0);
     }
